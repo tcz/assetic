@@ -11,10 +11,9 @@
 
 namespace Assetic\Filter;
 
-use Assetic\Exception\FilterException;
 use Assetic\Asset\AssetInterface;
 use Assetic\Filter\FilterInterface;
-use Symfony\Component\Process\ProcessBuilder;
+use Assetic\Util\ProcessBuilder;
 
 /**
  * Loads Compass files.
@@ -36,7 +35,6 @@ class CompassFilter implements FilterInterface
     private $force;
     private $style;
     private $quiet;
-    private $boring;
     private $noLineComments;
     private $imagesDir;
     private $javascriptsDir;
@@ -47,15 +45,11 @@ class CompassFilter implements FilterInterface
     private $httpPath;
     private $httpImagesPath;
     private $httpJavascriptsPath;
-
+    
     public function __construct($compassPath = '/usr/bin/compass')
     {
         $this->compassPath = $compassPath;
         $this->cacheLocation = sys_get_temp_dir();
-
-        if ('cli' !== php_sapi_name()) {
-            $this->boring = true;
-        }
     }
 
     public function setScss($scss)
@@ -100,16 +94,11 @@ class CompassFilter implements FilterInterface
         $this->quiet = $quiet;
     }
 
-    public function setBoring($boring)
-    {
-        $this->boring = $boring;
-    }
-
     public function setNoLineComments($noLineComments)
     {
         $this->noLineComments = $noLineComments;
     }
-
+    
     public function setImagesDir($imagesDir)
     {
         $this->imagesDir = $imagesDir;
@@ -140,12 +129,12 @@ class CompassFilter implements FilterInterface
     {
         $this->httpPath = $httpPath;
     }
-
+    
     public function setHttpImagesPath($httpImagesPath)
     {
         $this->httpImagesPath = $httpImagesPath;
     }
-
+    
     public function setHttpJavascriptsPath($httpJavascriptsPath)
     {
         $this->httpJavascriptsPath = $httpJavascriptsPath;
@@ -156,20 +145,20 @@ class CompassFilter implements FilterInterface
         $root = $asset->getSourceRoot();
         $path = $asset->getSourcePath();
 
-        $loadPaths = $this->loadPaths;
         if ($root && $path) {
-            $loadPaths[] = dirname($root.'/'.$path);
+            $this->loadPaths[] = dirname($root.'/'.$path);
         }
 
         // compass does not seems to handle symlink, so we use realpath()
         $tempDir = realpath(sys_get_temp_dir());
 
-        $pb = new ProcessBuilder(array(
-            $this->compassPath,
-            'compile',
-            $tempDir,
-        ));
-        $pb->inheritEnvironmentVariables();
+        $pb = new ProcessBuilder();
+        $pb
+            ->inheritEnvironmentVariables()
+            ->add($this->compassPath)
+            ->add('compile')
+            ->add($tempDir)
+        ;
 
         if ($this->force) {
             $pb->add('--force');
@@ -181,10 +170,6 @@ class CompassFilter implements FilterInterface
 
         if ($this->quiet) {
             $pb->add('--quiet');
-        }
-
-        if ($this->boring) {
-            $pb->add('--boring');
         }
 
         if ($this->noLineComments) {
@@ -205,8 +190,8 @@ class CompassFilter implements FilterInterface
         // options in config file
         $optionsConfig = array();
 
-        if (!empty($loadPaths)) {
-            $optionsConfig['additional_import_paths'] = $loadPaths;
+        if (!empty($this->loadPaths)) {
+            $optionsConfig['additional_import_paths'] = $this->loadPaths;
         }
 
         if ($this->unixNewlines) {
@@ -290,7 +275,7 @@ class CompassFilter implements FilterInterface
                 unlink($configFile);
             }
 
-            throw FilterException::fromProcess($proc)->setInput($asset->getContent());
+            throw new \RuntimeException($proc->getErrorOutput() ?: $proc->getOutput());
         }
 
         $asset->setContent(file_get_contents($output));

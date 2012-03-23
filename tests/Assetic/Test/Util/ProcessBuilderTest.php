@@ -11,7 +11,7 @@
 
 namespace Assetic\Test\Util;
 
-use Symfony\Component\Process\ProcessBuilder;
+use Assetic\Util\ProcessBuilder;
 
 class ProcessBuilderTest extends \PHPUnit_Framework_TestCase
 {

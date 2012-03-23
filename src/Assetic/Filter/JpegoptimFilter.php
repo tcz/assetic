@@ -12,7 +12,7 @@
 namespace Assetic\Filter;
 
 use Assetic\Asset\AssetInterface;
-use Symfony\Component\Process\ProcessBuilder;
+use Assetic\Util\ProcessBuilder;
 
 /**
  * Runs assets through Jpegoptim.
@@ -52,7 +52,11 @@ class JpegoptimFilter implements FilterInterface
 
     public function filterDump(AssetInterface $asset)
     {
-        $pb = new ProcessBuilder(array($this->jpegoptimBin));
+        $pb = new ProcessBuilder();
+        $pb
+            ->inheritEnvironmentVariables()
+            ->add($this->jpegoptimBin)
+        ;
 
         if ($this->stripAll) {
             $pb->add('--strip-all');

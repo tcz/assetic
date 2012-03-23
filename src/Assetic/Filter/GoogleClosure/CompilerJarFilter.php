@@ -12,7 +12,7 @@
 namespace Assetic\Filter\GoogleClosure;
 
 use Assetic\Asset\AssetInterface;
-use Symfony\Component\Process\ProcessBuilder;
+use Assetic\Util\ProcessBuilder;
 
 /**
  * Filter for the Google Closure Compiler JAR.
@@ -34,11 +34,13 @@ class CompilerJarFilter extends BaseCompilerFilter
     {
         $cleanup = array();
 
-        $pb = new ProcessBuilder(array(
-            $this->javaPath,
-            '-jar',
-            $this->jarPath,
-        ));
+        $pb = new ProcessBuilder();
+        $pb
+            ->inheritEnvironmentVariables()
+            ->add($this->javaPath)
+            ->add('-jar')
+            ->add($this->jarPath)
+        ;
 
         if (null !== $this->compilationLevel) {
             $pb->add('--compilation_level')->add($this->compilationLevel);

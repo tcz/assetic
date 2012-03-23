@@ -12,7 +12,7 @@
 namespace Assetic\Filter;
 
 use Assetic\Asset\AssetInterface;
-use Symfony\Component\Process\ProcessBuilder;
+use Assetic\Util\ProcessBuilder;
 
 /**
  * Runs assets through pngout.
@@ -85,7 +85,11 @@ class PngoutFilter implements FilterInterface
 
     public function filterDump(AssetInterface $asset)
     {
-        $pb = new ProcessBuilder(array($this->pngoutBin));
+        $pb = new ProcessBuilder();
+        $pb
+            ->inheritEnvironmentVariables()
+            ->add($this->pngoutBin)
+        ;
 
         if (null !== $this->color) {
             $pb->add('-c'.$this->color);

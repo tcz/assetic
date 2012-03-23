@@ -12,7 +12,7 @@
 namespace Assetic\Filter;
 
 use Assetic\Asset\AssetInterface;
-use Symfony\Component\Process\ProcessBuilder;
+use Assetic\Util\ProcessBuilder;
 
 /**
  * Loads STYL files.
@@ -54,7 +54,7 @@ class StylusFilter implements FilterInterface
     {
         static $format = <<<'EOF'
 var stylus = require('stylus');
-var sys    = require(process.binding('natives').util ? 'util' : 'sys');
+var sys    = require('sys');
 
 stylus(%s, %s).render(function(e, css){
     if (e) {

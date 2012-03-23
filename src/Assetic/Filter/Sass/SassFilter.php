@@ -13,7 +13,7 @@ namespace Assetic\Filter\Sass;
 
 use Assetic\Asset\AssetInterface;
 use Assetic\Filter\FilterInterface;
-use Symfony\Component\Process\ProcessBuilder;
+use Assetic\Util\ProcessBuilder;
 
 /**
  * Loads SASS files.
@@ -97,7 +97,11 @@ class SassFilter implements FilterInterface
 
     public function filterLoad(AssetInterface $asset)
     {
-        $pb = new ProcessBuilder(array($this->sassPath));
+        $pb = new ProcessBuilder();
+        $pb
+            ->inheritEnvironmentVariables()
+            ->add($this->sassPath)
+        ;
 
         $root = $asset->getSourceRoot();
         $path = $asset->getSourcePath();

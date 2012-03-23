@@ -159,22 +159,6 @@ class AssetFactoryTest extends \PHPUnit_Framework_TestCase
         $this->factory->createAsset(array('foo.js', 'bar.js'));
     }
 
-    public function testWorkerReturn()
-    {
-        $worker = $this->getMock('Assetic\\Factory\\Worker\\WorkerInterface');
-        $asset = $this->getMock('Assetic\\Asset\\AssetInterface');
-
-        $worker->expects($this->at(2))
-            ->method('process')
-            ->with($this->isInstanceOf('Assetic\\Asset\\AssetCollectionInterface'))
-            ->will($this->returnValue($asset));
-
-        $this->factory->addWorker($worker);
-        $coll = $this->factory->createAsset(array('foo.js', 'bar.js'));
-
-        $this->assertEquals(1, count(iterator_to_array($coll)));
-    }
-
     public function testNestedFormula()
     {
         $this->fm->expects($this->once())
@@ -199,19 +183,5 @@ class AssetFactoryTest extends \PHPUnit_Framework_TestCase
         }
 
         $this->assertEquals(2, $i);
-    }
-
-    public function testGenerateUniqueAssetName()
-    {
-        $filename = 'Resource/Fixtures/css/style.css';
-        $filepath = __DIR__ . DIRECTORY_SEPARATOR . $filename;
-
-        file_put_contents($filepath, 'body{color:#444;background:#eee;}');
-        $name1 = $this->factory->generateAssetName(array($filename), array(), array());
-
-        file_put_contents($filepath, 'body{color:#222;background:#fff;}');
-        $name2 = $this->factory->generateAssetName(array($filename), array(), array());
-
-        $this->assertTrue($name1 != $name2);
     }
 }

@@ -12,7 +12,7 @@
 namespace Assetic\Filter;
 
 use Assetic\Asset\AssetInterface;
-use Symfony\Component\Process\ProcessBuilder;
+use Assetic\Util\ProcessBuilder;
 
 /**
  * Runs assets through Sprockets.
@@ -101,10 +101,12 @@ EOF;
             $more
         ));
 
-        $pb = new ProcessBuilder(array(
-            $this->rubyBin,
-            $input,
-        ));
+        $pb = new ProcessBuilder();
+        $pb
+            ->inheritEnvironmentVariables()
+            ->add($this->rubyBin)
+            ->add($input)
+        ;
 
         $proc = $pb->getProcess();
         $code = $proc->run();
